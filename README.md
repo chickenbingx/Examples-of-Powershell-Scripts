@@ -12,7 +12,7 @@ These scripts where part of a little project to prepare the shared mailboxes for
 
 * __*Setting Correct Routing Address after Migration*__
 
-I created this script when I found that during the migration of our Exchange, I found that emails were not being delivered to people post migration. During research, I was able to identify that the routing address for the on-prem Exchange had not be changed to the @(*O365TenantPrefix*.).Mail.Onmicrosoft.com address. With our set up, this meant that the users’ emails were being delivered to on-prem exchange, where they would be missing. This script allowed us to close a lot of tickets and change the migration process to make sure the routing address was set correctly.
+I created this script when I found that during the migration of our Exchange, I found that emails were not being delivered to people post migration. During research, I was able to identify that the routing address for the on-prem Exchange had not be changed to the @(**O365TenantPrefix**).Mail.Onmicrosoft.com address. With our set up, this meant that the users’ emails were being delivered to on-prem exchange, where they would be missing. This script allowed us to close a lot of tickets and change the migration process to make sure the routing address was set correctly.
 
 ## Office 365
 
