@@ -50,7 +50,7 @@ function New-UUADHoc {
         [Parameter(Mandatory = $True,
             ValueFromPipelineByPropertyName = $true,
             Position = 6)]
-            [validateSet('Helpdesk', 'ADHOC')]$Request
+        [validateSet('Helpdesk', 'ADHOC')]$Request
     )
 
     Begin {
@@ -70,9 +70,9 @@ function New-UUADHoc {
         $Nums += Get-Random -InputObject $Numbers -Count 3
         $Spec += Get-Random -InputObject $Special -Count 1
 
-        $LetterPass = ($Letters | Sort-Object {Get-Random}) -join ''
-        $NumPass = ($Nums | Sort-Object {Get-Random}) -join ''
-        $SpecPass = ($Spec | Sort-Object {Get-Random}) -join ''
+        $LetterPass = ($Letters | Sort-Object { Get-Random }) -join ''
+        $NumPass = ($Nums | Sort-Object { Get-Random }) -join ''
+        $SpecPass = ($Spec | Sort-Object { Get-Random }) -join ''
 
         $Password = $LetterPass + $NumPass + $SpecPass
         $EncryptedPassword = ConvertTo-SecureString -String $Password -AsPlainText -Force
@@ -103,10 +103,10 @@ function New-UUADHoc {
         $DC = 'IDH-HOPDC'
         $LicExportLive = "C:\Users\tturner\Documents\Infra\O365\Licenses\User Creation - License Application.csv"
         $OU = "OU=Live_Accounts,OU=Unique_User_Project,OU=Clinician - users,OU=Practice - Users,OU=IDH_Users,OU=Managed,DC=idh,DC=local"
-        $UserCheck = [bool] (Get-ADUser -Filter {Samaccountname -eq $GDC} -Server $DC)
+        $UserCheck = [bool] (Get-ADUser -Filter { Samaccountname -eq $GDC } -Server $DC)
         $groups = @('Sharepoint_Clinician', 'Office365_SSPR_Security')
         $GroupSearch = "$site" + "_Sec*"
-        $Groups += Get-ADGroup -Filter {Name -like $GroupSearch} -Server $DC | select -ExpandProperty Name
+        $Groups += Get-ADGroup -Filter { Name -like $GroupSearch } -Server $DC | select -ExpandProperty Name
 
         Switch ($AccountType) {
             'Dentist' {
@@ -115,13 +115,13 @@ function New-UUADHoc {
 
                     $groups += 'Office365_F1_Security'
                     $GroupSearch = "$siteno" + "_sec*"
-                    $Groups += Get-ADGroup -Filter {Name -like $GroupSearch} -Server $DC | select -ExpandProperty Name                                                                                     
+                    $Groups += Get-ADGroup -Filter { Name -like $GroupSearch } -Server $DC | select -ExpandProperty Name                                                                                     
 
                 }
                 ELSE {
                     $groups += 'Office365_F1(Sharepoint)_Security'
                     $GroupSearch = "$siteno" + "_sec*"
-                    $Groups += Get-ADGroup -Filter {Name -like $GroupSearch} -Server $DC | select -ExpandProperty Name
+                    $Groups += Get-ADGroup -Filter { Name -like $GroupSearch } -Server $DC | select -ExpandProperty Name
 
                 }
 
@@ -129,7 +129,7 @@ function New-UUADHoc {
                                                            
                     $groups += 'Office365_F1(Sharepoint)_Security'                    
                     $GroupSearch = "$siteno" + "_sec*"
-                    $Groups += Get-ADGroup -Filter {Name -like $GroupSearch} -Server $DC | select -ExpandProperty Name
+                    $Groups += Get-ADGroup -Filter { Name -like $GroupSearch } -Server $DC | select -ExpandProperty Name
                                                                                   
                 }
 
@@ -138,7 +138,7 @@ function New-UUADHoc {
                                                            
                 $groups = @('Sharepoint_Clinician')
                 $GroupSearch = "$siteno" + "_sec*"
-                $Groups += Get-ADGroup -Filter {Name -like $GroupSearch} -Server $DC | select -ExpandProperty Name
+                $Groups += Get-ADGroup -Filter { Name -like $GroupSearch } -Server $DC | select -ExpandProperty Name
                                                                                                                  
             }
                                                  
@@ -148,7 +148,7 @@ function New-UUADHoc {
        
     }
 
-#######################################################################################
+    #######################################################################################
 
     Process {
 
@@ -338,96 +338,96 @@ function New-UUADHoc {
 
     }
 
-####################################################################################
+    ####################################################################################
     End {
             
-$PSUSer = ($env:USERNAME).TrimEnd('1')
-            $Query = "Select * from $UUTable where SiteNo = '$Siteno' and Creation_Type = 'Adhoc'"
+        $PSUSer = ($env:USERNAME).TrimEnd('1')
+        $Query = "Select * from $UUTable where SiteNo = '$Siteno' and Creation_Type = 'Adhoc'"
 
-            Switch($Request){
-                            'Helpdesk'{
+        Switch ($Request) {
+            'Helpdesk' {
 
-                            $exportFolder = "C:\Users\$PSUSer\Box\Departments\IT\IT - Infrastructure - Box\Projects\Unique Users\Clinician Accounts Created\Helpdesk Requests"
+                $exportFolder = "C:\Users\$PSUSer\Box\Departments\IT\IT - Infrastructure - Box\Projects\Unique Users\Clinician Accounts Created\Helpdesk Requests"
 
-                            if(!(Test-Path $exportFolder)){
+                if (!(Test-Path $exportFolder)) {
                                                        
-                                                          $exportFolder = "C:\Users\$PSUSer\Box\IT - Infrastructure - Box\Projects\Unique Users\Clinician Accounts Created\Helpdesk Requests"
+                    $exportFolder = "C:\Users\$PSUSer\Box\IT - Infrastructure - Box\Projects\Unique Users\Clinician Accounts Created\Helpdesk Requests"
                                                        
-                                                          }
+                }
 
-                            $exportNAme = "Unique Users - Users for $Siteno (Helpdesk).xlsx"
+                $exportNAme = "Unique Users - Users for $Siteno (Helpdesk).xlsx"
 
-                                      }
-                            'ADHOC'{
+            }
+            'ADHOC' {
 
-                            $exportFolder = "C:\Users\$PSUSer\Box\Departments\IT\IT - Infrastructure - Box\Projects\Unique Users\Clinician Accounts Created\Adhoc Requests"
+                $exportFolder = "C:\Users\$PSUSer\Box\Departments\IT\IT - Infrastructure - Box\Projects\Unique Users\Clinician Accounts Created\Adhoc Requests"
 
-                                    if(!(Test-Path $exportFolder)){
+                if (!(Test-Path $exportFolder)) {
                                                                   
-                                                                  $exportFolder = "C:\Users\$PSUSer\IT - Infrastructure - Box\Projects\Unique Users\Clinician Accounts Created\Adhoc Requests"
+                    $exportFolder = "C:\Users\$PSUSer\IT - Infrastructure - Box\Projects\Unique Users\Clinician Accounts Created\Adhoc Requests"
                                                                   
-                                                                  }
+                }
 
                                    
-                                   $exportNAme = "Unique Users - Users for $Siteno (ADHOC).xlsx"
-                                   }
-                            }
+                $exportNAme = "Unique Users - Users for $Siteno (ADHOC).xlsx"
+            }
+        }
     
-            if (Test-Path $exportFolder) {
+        if (Test-Path $exportFolder) {
                          
-                $Export = "$exportFolder" + "\" + "$exportNAme"
+            $Export = "$exportFolder" + "\" + "$exportNAme"
                          
-            }
-            ELSE {
+        }
+        ELSE {
 
-                $Export = "C:\Users\$PSUSer\Box\Departments\IT\IT - Infrastructure - Box\Projects\Unique Users\Clinician Accounts Created\" + "$exportNAme"
+            $Export = "C:\Users\$PSUSer\Box\Departments\IT\IT - Infrastructure - Box\Projects\Unique Users\Clinician Accounts Created\" + "$exportNAme"
 
-            }
+        }
 
 
-            if (Test-Path $Export) {
+        if (Test-Path $Export) {
                          
-                Remove-Item $Export -Force
+            Remove-Item $Export -Force
 
-            }
+        }
 
-            $t = Invoke-Sqlcmd -ServerInstance $DBServer -Database $DBName -Query $Query | select Siteno, @{n = "Dentist Name"; e = {$_.Dentist_Name}}, Username, Password, Account_Type
+        $t = Invoke-Sqlcmd -ServerInstance $DBServer -Database $DBName -Query $Query | select Siteno, @{n = "Dentist Name"; e = { $_.Dentist_Name } }, Username, Password, Account_Type
 
-            $excel = New-Object -ComObject Excel.Application
+        $excel = New-Object -ComObject Excel.Application
 
-            $excel.Visible = $False
+        $excel.Visible = $False
 
-            $workbook = $excel.Workbooks.Add()
+        $workbook = $excel.Workbooks.Add()
 
-            $sheet = $workbook.ActiveSheet
+        $sheet = $workbook.ActiveSheet
 
-            $counter = 1
+        $counter = 1
 
-            $sheet.Cells.Item(1, 1) = 'SiteNo'
-            $sheet.Cells.Item(1, 2) = 'Dentist Name'
-            $sheet.Cells.Item(1, 3) = 'Username'
-            $sheet.Cells.Item(1, 4) = 'Password'
-            $sheet.Cells.Item(1, 5) = 'Account Type'
+        $sheet.Cells.Item(1, 1) = 'SiteNo'
+        $sheet.Cells.Item(1, 2) = 'Dentist Name'
+        $sheet.Cells.Item(1, 3) = 'Username'
+        $sheet.Cells.Item(1, 4) = 'Password'
+        $sheet.Cells.Item(1, 5) = 'Account Type'
 
-            ForEach ($Dentist in $T) {
+        ForEach ($Dentist in $T) {
 
-                $counter++
+            $counter++
 
-                $sheet.cells.Item($counter, 1) = $dentist.Siteno
+            $sheet.cells.Item($counter, 1) = $dentist.Siteno
 
-                $sheet.cells.Item($counter, 2) = $dentist.'Dentist Name'
+            $sheet.cells.Item($counter, 2) = $dentist.'Dentist Name'
 
-                $sheet.cells.Item($counter, 3) = $dentist.'Username'
+            $sheet.cells.Item($counter, 3) = $dentist.'Username'
 
-                $sheet.cells.Item($counter, 4) = $dentist.'Password'
+            $sheet.cells.Item($counter, 4) = $dentist.'Password'
 
-                $sheet.cells.Item($counter, 5) = $dentist.'Account_Type'
+            $sheet.cells.Item($counter, 5) = $dentist.'Account_Type'
 
-            }
+        }
 
-            $workbook.SaveAs($Export)
-            $excel.Quit()
-            <#
+        $workbook.SaveAs($Export)
+        $excel.Quit()
+        <#
             if (Get-Process Excel) {
                      
                 Get-Process excel | Stop-Process -Force
@@ -435,7 +435,7 @@ $PSUSer = ($env:USERNAME).TrimEnd('1')
             }
             #>
 
-        }
-
-
     }
+
+
+}

@@ -8,72 +8,68 @@
 .EXAMPLE
    Another example of how to use this cmdlet
 #>
-function Check-O365GUID
-{
-    [CmdletBinding()]
-    [Alias()]
-    [OutputType([int])]
-    Param
-    (
-        # Param1 help description
-        [Parameter(Mandatory=$true,
-                   ValueFromPipelineByPropertyName=$true,
-                   Position=0)]
-        $Identity
+function Check-O365GUID {
+   [CmdletBinding()]
+   [Alias()]
+   [OutputType([int])]
+   Param
+   (
+      # Param1 help description
+      [Parameter(Mandatory = $true,
+         ValueFromPipelineByPropertyName = $true,
+         Position = 0)]
+      $Identity
 
-    )
+   )
 
-    Begin
-    {
+   Begin {
 
-    $Usercheck = [bool](Get-ADUser $Identity)
-    $365Cred = Get-Credential -UserName "$env:USERNAME@mydentist.co.uk" -Message "Enter 365 Admin Credentials"
-    }
-    Process
-    {
+      $Usercheck = [bool](Get-ADUser $Identity)
+      $365Cred = Get-Credential -UserName "$env:USERNAME@mydentist.co.uk" -Message "Enter 365 Admin Credentials"
+   }
+   Process {
 
-    switch($Usercheck){
-                      "True"{
+      switch ($Usercheck) {
+         "True" {
                             
-                            $AD = Get-ADUser $Identity
-                            $g = new-object -TypeName System.Guid -ArgumentList $AD.objectguid
-                            $b64 = [System.Convert]::ToBase64String($g.ToByteArray())
+            $AD = Get-ADUser $Identity
+            $g = new-object -TypeName System.Guid -ArgumentList $AD.objectguid
+            $b64 = [System.Convert]::ToBase64String($g.ToByteArray())
 
-                            Connect-MsolService -Credential $365Cred
+            Connect-MsolService -Credential $365Cred
 
-                            $365check = [bool](Get-MsolUser -UserPrincipalName $ad.UserprincipalName)
+            $365check = [bool](Get-MsolUser -UserPrincipalName $ad.UserprincipalName)
 
-                                switch($365check){
-                                                 "True"{
+            switch ($365check) {
+               "True" {
                                                        
-                                                       $365GUID = Get-MsolUser -UserPrincipalName $ad.UserprincipalName | select -ExpandProperty ImmutableId
+                  $365GUID = Get-MsolUser -UserPrincipalName $ad.UserprincipalName | select -ExpandProperty ImmutableId
 
-                                                       switch($365GUID){
-                                                                       $B64{Write-Host "GUIDs for $Identity match between AD and O365" -ForegroundColor Green}
-                                                                       default{Write-Warning "GUIDS for $Identity do not match between AS and O365"}
-                                                                       }
+                  switch ($365GUID) {
+                     $B64 { Write-Host "GUIDs for $Identity match between AD and O365" -ForegroundColor Green }
+                     default { Write-Warning "GUIDS for $Identity do not match between AS and O365" }
+                  }
 
 
-                                                       }
-                                                 "False"{
+               }
+               "False" {
                                                         
-                                                        Write-Warning "Cant find a Office 365 account for $Identity"
+                  Write-Warning "Cant find a Office 365 account for $Identity"
                                                         
-                                                        }
-                                                 }
+               }
+            }
 
                             
 
-                            }
-                      "False"{
+         }
+         "False" {
                              
-                             Write-Warning "$Identity is not a valid user in AD - Please try again."
+            Write-Warning "$Identity is not a valid user in AD - Please try again."
                              
-                             }
-                      }
+         }
+      }
 
-    }
-    End
-    {
-    }
+   }
+   End {
+   }
 }

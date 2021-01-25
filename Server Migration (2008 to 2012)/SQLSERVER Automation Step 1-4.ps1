@@ -1,17 +1,16 @@
-﻿if((Get-Service -Name MSSQLSERVER).Status -ne "Running"){
+﻿if ((Get-Service -Name MSSQLSERVER).Status -ne "Running") {
 
-Write-Verbose "Turning MSSQLSERVER Service on..." -Verbose
+    Write-Verbose "Turning MSSQLSERVER Service on..." -Verbose
 
-Set-Service -Name MSSQLSERVER -StartupType Automatic -Status Running
+    Set-Service -Name MSSQLSERVER -StartupType Automatic -Status Running
 
 }
-else
-{
+else {
 
 
-Write-Verbose "Restarting MSSQLSERVER ..." -Verbose
+    Write-Verbose "Restarting MSSQLSERVER ..." -Verbose
 
-Get-Service -Name MSSQLSERVER | Restart-Service -Force
+    Get-Service -Name MSSQLSERVER | Restart-Service -Force
 
 
 }
@@ -25,15 +24,15 @@ $DBs = Get-SqlDatabase -ServerInstance $Localhost | where Name -in $R4DBNames
 
 ##### Start of Step 1 #####
 
-If($DBs.Count -ge '1'){
+If ($DBs.Count -ge '1') {
 
-foreach($DB in $DBs){
+    foreach ($DB in $DBs) {
 
-$DBName = $DB.Name
+        $DBName = $DB.Name
 
-Write-Verbose "Detaching $DBName from $ServerName" -Verbose
+        Write-Verbose "Detaching $DBName from $ServerName" -Verbose
 
-Invoke-Sqlcmd -ServerInstance $Localhost -Query "USE [master]
+        Invoke-Sqlcmd -ServerInstance $Localhost -Query "USE [master]
 GO
 ALTER DATABASE [$DBName] SET  SINGLE_USER WITH ROLLBACK IMMEDIATE
 GO
@@ -43,13 +42,12 @@ EXEC master.dbo.sp_detach_db @dbname = N'$DBname'
 GO
 "
 
-}
+    }
 
 }
-ELSE
-{
+ELSE {
 
-Write-Verbose "There is no R4 DBs which need detatching..." -Verbose
+    Write-Verbose "There is no R4 DBs which need detatching..." -Verbose
 
 }
 
@@ -59,46 +57,46 @@ Write-Verbose "There is no R4 DBs which need detatching..." -Verbose
 
 Set-Location "c:\"
 
-$DataDrive = (Get-PSDrive | where {$_."Free" -ne $Null -and $_.Name -ne "C" -and $_."Free" -ne "0.00"}).Name
+$DataDrive = (Get-PSDrive | where { $_."Free" -ne $Null -and $_.Name -ne "C" -and $_."Free" -ne "0.00" }).Name
 $DataDrive = $DataDrive + ":\"
-$sys2data = $DataDrive  + "Sys2data"
+$sys2data = $DataDrive + "Sys2data"
 $CdriveLocationroot = "C:\Server_Swap_Files"
 
-foreach($DB in $R4DBNames){
+foreach ($DB in $R4DBNames) {
 
-$DBCDriveLocation = "$CdriveLocationroot\MDFs, LDFs and LIC"
+    $DBCDriveLocation = "$CdriveLocationroot\MDFs, LDFs and LIC"
 
-if(!(Test-Path $DBCDriveLocation)){
+    if (!(Test-Path $DBCDriveLocation)) {
 
-New-Item $DBCDriveLocation -ItemType Directory | Out-Null
+        New-Item $DBCDriveLocation -ItemType Directory | Out-Null
 
-}
+    }
 
-if($DB -eq "Sys2000"){
+    if ($DB -eq "Sys2000") {
 
-$LICLocation = $sys2data + "\" + "$DB.lic"
+        $LICLocation = $sys2data + "\" + "$DB.lic"
 
-Write-Verbose "Moving Sys2000 license to $DBCDriveLocation"
+        Write-Verbose "Moving Sys2000 license to $DBCDriveLocation"
 
-Move-Item -Path $LICLocation -Destination $DBCDriveLocation -Force
+        Move-Item -Path $LICLocation -Destination $DBCDriveLocation -Force
 
-}
+    }
 
-$MDF = "$DB" + ".MDF"
-$LDF = "$DB" + "_Log.LDF"
-$DBFiles = @()
-$DBFiles += $sys2data + "\" + $MDF
-$DBFiles += $sys2data + "\" + $LDF
+    $MDF = "$DB" + ".MDF"
+    $LDF = "$DB" + "_Log.LDF"
+    $DBFiles = @()
+    $DBFiles += $sys2data + "\" + $MDF
+    $DBFiles += $sys2data + "\" + $LDF
 
 
 
-foreach($File in $DBFiles){
+    foreach ($File in $DBFiles) {
 
-Write-Verbose "Moving $File to $DBCDriveLocation" -Verbose
+        Write-Verbose "Moving $File to $DBCDriveLocation" -Verbose
 
-Move-Item -Path $File -Destination $DBCDriveLocation -Force
+        Move-Item -Path $File -Destination $DBCDriveLocation -Force
 
-}
+    }
 
 }
 
@@ -109,42 +107,42 @@ Move-Item -Path $File -Destination $DBCDriveLocation -Force
 
 $ShutdownDescision = Read-Host -Prompt "Step 3 is to shutdown the server. Please enter Y or N?"
 
-switch($ShutdownDescision){
-"Y"{
+switch ($ShutdownDescision) {
+    "Y" {
 
-Stop-Computer -Force
+        Stop-Computer -Force
 
-}
-"N"{
+    }
+    "N" {
 
-Write-Host "Please shutdown server manually once you are ready to shutdown" -ForegroundColor Yellow
+        Write-Host "Please shutdown server manually once you are ready to shutdown" -ForegroundColor Yellow
 
-}
-default{
+    }
+    default {
 
-$ShutdownDescision = Read-Host -Prompt "You have entered the wrong input. Please answer with either a 'Y' or 'N'"
+        $ShutdownDescision = Read-Host -Prompt "You have entered the wrong input. Please answer with either a 'Y' or 'N'"
 
-switch($ShutdownDescision){
-"Y"{
+        switch ($ShutdownDescision) {
+            "Y" {
 
-Stop-Computer -Force
+                Stop-Computer -Force
 
-}
-"N"{
+            }
+            "N" {
 
-Write-Host "Please shutdown server manually once you are ready to shutdown" -ForegroundColor Yellow
+                Write-Host "Please shutdown server manually once you are ready to shutdown" -ForegroundColor Yellow
 
-}
-default{
+            }
+            default {
 
-Write-Host "You have entered an incorrect value again. Please shutdown server manually once you are ready to shutdown" -ForegroundColor Yellow
+                Write-Host "You have entered an incorrect value again. Please shutdown server manually once you are ready to shutdown" -ForegroundColor Yellow
 
 
-}
+            }
 
-}
+        }
 
-}
+    }
 
 }
 

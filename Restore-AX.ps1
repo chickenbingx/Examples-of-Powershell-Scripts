@@ -8,271 +8,264 @@
 .EXAMPLE
    Another example of how to use this cmdlet
 #>
-function Restore-AX
-{
+function Restore-AX {
     [CmdletBinding()]
     [Alias()]
     [OutputType([int])]
     Param
     (
-        [Parameter(Mandatory=$true,
-                   ValueFromPipelineByPropertyName=$true,
-                   Position=0)]
+        [Parameter(Mandatory = $true,
+            ValueFromPipelineByPropertyName = $true,
+            Position = 0)]
         [ValidateSet(
-                    'UAT',
-                    'UAT2',
-                    'TEST',
-                    'DEV'
-                    )]
+            'UAT',
+            'UAT2',
+            'TEST',
+            'DEV'
+        )]
         $Environment,
 
-        [parameter(Mandatory=$True,
-                   Position=1                  
-                  )]
+        [parameter(Mandatory = $True,
+            Position = 1                  
+        )]
         [ValidateSet(
-                    'PROD',
-                    'UAT',
-                    'UAT2',
-                    'TEST'
-                    )]
+            'PROD',
+            'UAT',
+            'UAT2',
+            'TEST'
+        )]
         $RestoreFrom,
 
-        [Parameter(Mandatory=$True,
-                   Position=2
-                  )]
+        [Parameter(Mandatory = $True,
+            Position = 2
+        )]
         [ValidateSet(
-                    'Data',
-                    'Model',
-                    'Data&Model'
-                    )]
+            'Data',
+            'Model',
+            'Data&Model'
+        )]
         $RestoreType
     )
 
-    Begin
-    {
+    Begin {
 
-    Set-Location c:\
+        Set-Location c:\
 
-$Start = Get-Date -Format "HH:mm:ss"
+        $Start = Get-Date -Format "HH:mm:ss"
 
-    if($env:USERNAME -notlike "*1"){
+        if ($env:USERNAME -notlike "*1") {
                                    
-                                   Write-Error "Log in with your 1 account"
+            Write-Error "Log in with your 1 account"
                                    
-                                   Break
+            Break
 
-                                   }
+        }
 
-    if($Environment -match $RestoreFrom){
+        if ($Environment -match $RestoreFrom) {
                                         
-                                        Write-Warning "You have select the same environment as your restore source and destination. Please reselect the parameters"
+            Write-Warning "You have select the same environment as your restore source and destination. Please reselect the parameters"
 
-                                        break
+            break
                                         
-                                        }
-    $Gee = Get-Date
-    $Date = Get-Date $gee -Format "dd_MM_yy"
-    $DayMonth = Get-Date $gee -Format "dd_MM"
-    $EnvServer = "IDH-$Environment-SQL-01.IDHDYN.COM"
-    $ResServer = "IDH-$RestoreFrom-SQL-01.IDHDYN.COM"
+        }
+        $Gee = Get-Date
+        $Date = Get-Date $gee -Format "dd_MM_yy"
+        $DayMonth = Get-Date $gee -Format "dd_MM"
+        $EnvServer = "IDH-$Environment-SQL-01.IDHDYN.COM"
+        $ResServer = "IDH-$RestoreFrom-SQL-01.IDHDYN.COM"
 
-    $EnvDBs = @()
-    $ResDBs = @()
+        $EnvDBs = @()
+        $ResDBs = @()
 
     
 
-    switch($RestoreType){
-                       'Data'{
-                             $EnvDBs += "AX2012_$Environment"
-                             $ResDBs += "AX2012_$RestoreFrom"
-                             }
-                       'Model'{
-                              $EnvDBs += "AX2012_$Environment" + "_Model"
-                              $ResDBs += "AX2012_$RestoreFrom" + "_Model"
-                              }
-                  'Data&Model'{
-                              $EnvDBs += "AX2012_$Environment"
-                              $EnvDBs += "AX2012_$Environment" + "_Model"
-                              $ResDBs += "AX2012_$RestoreFrom"
-                              $ResDBs += "AX2012_$RestoreFrom" + "_Model"
-                              }
-                        }
+        switch ($RestoreType) {
+            'Data' {
+                $EnvDBs += "AX2012_$Environment"
+                $ResDBs += "AX2012_$RestoreFrom"
+            }
+            'Model' {
+                $EnvDBs += "AX2012_$Environment" + "_Model"
+                $ResDBs += "AX2012_$RestoreFrom" + "_Model"
+            }
+            'Data&Model' {
+                $EnvDBs += "AX2012_$Environment"
+                $EnvDBs += "AX2012_$Environment" + "_Model"
+                $ResDBs += "AX2012_$RestoreFrom"
+                $ResDBs += "AX2012_$RestoreFrom" + "_Model"
+            }
+        }
 
-    $envDBOrig = "AX2012_$Environment" + "_Orig" 
+        $envDBOrig = "AX2012_$Environment" + "_Orig" 
 
-    $EnvDrive = "\\$EnvServer\t$"
-    $ResDrive = "\\$ResServer\t$" 
+        $EnvDrive = "\\$EnvServer\t$"
+        $ResDrive = "\\$ResServer\t$" 
 
-    if(Test-Path "$ResDrive\Toby"){
+        if (Test-Path "$ResDrive\Toby") {
                                   
-                                  $ResDrive = "$ResDrive\Toby"
-                                  $ResfolderName = "Restore $DayMonth"
+            $ResDrive = "$ResDrive\Toby"
+            $ResfolderName = "Restore $DayMonth"
 
-                                  if(!(Test-Path "$ResDrive\$ResfolderName")){
+            if (!(Test-Path "$ResDrive\$ResfolderName")) {
 
-                                  New-Item "$ResDrive\$ResfolderName" -ItemType Directory
+                New-Item "$ResDrive\$ResfolderName" -ItemType Directory
 
-                                                                          }
-
-                                  
-                                  }
-                                  ELSE
-                                  {
-
-                                  $ResDrive = "$ResDrive\Toby"
-
-                                  New-Item $ResDrive -ItemType Directory
-
-                                  $ResfolderName = "Restore $DayMonth"
-
-                                  if(!(Test-Path "$ResDrive\$ResfolderName")){
-
-                                  New-Item "$ResDrive\$folderName" -ItemType Directory
-
-                                                                          }
-
-
-                                  }
-if(Test-Path "$EnvDrive\Toby"){
-                                  
-                                  $EnvDrive = "$EnvDrive\Toby"
-                                  $EnvfolderName = "$Environment Restore From $RestoreFrom $DayMonth"
-
-                                  if(!(Test-Path "$EnvDrive\$EnvFoldername")){
-
-                                  New-Item "$EnvDrive\$EnvFoldername" -ItemType Directory
-
-                                                                          }
+            }
 
                                   
-                                  }
-                                  ELSE
-                                  {
+        }
+        ELSE {
 
-                                  New-Item $EnvDrive -ItemType Directory
+            $ResDrive = "$ResDrive\Toby"
 
-                                  $EnvFoldername = "$Environment Restore From $RestoreFrom $DayMonth"
+            New-Item $ResDrive -ItemType Directory
 
-                                  if(!(Test-Path "$EnvDrive\$EnvFoldername")){
+            $ResfolderName = "Restore $DayMonth"
 
-                                  New-Item "$EnvDrive\$EnvFoldername" -ItemType Directory
+            if (!(Test-Path "$ResDrive\$ResfolderName")) {
 
-                                                                          }
+                New-Item "$ResDrive\$folderName" -ItemType Directory
+
+            }
+
+
+        }
+        if (Test-Path "$EnvDrive\Toby") {
                                   
-                                }
+            $EnvDrive = "$EnvDrive\Toby"
+            $EnvfolderName = "$Environment Restore From $RestoreFrom $DayMonth"
 
-    $ResBKUPFolder = "$ResDrive\$ResfolderName"
+            if (!(Test-Path "$EnvDrive\$EnvFoldername")) {
 
-    $ResDBHash = @{}
+                New-Item "$EnvDrive\$EnvFoldername" -ItemType Directory
+
+            }
+
+                                  
+        }
+        ELSE {
+
+            New-Item $EnvDrive -ItemType Directory
+
+            $EnvFoldername = "$Environment Restore From $RestoreFrom $DayMonth"
+
+            if (!(Test-Path "$EnvDrive\$EnvFoldername")) {
+
+                New-Item "$EnvDrive\$EnvFoldername" -ItemType Directory
+
+            }
+                                  
+        }
+
+        $ResBKUPFolder = "$ResDrive\$ResfolderName"
+
+        $ResDBHash = @{}
 
     }
-    Process
-    {
+    Process {
 
-     foreach($DB in $ResDBs){
+        foreach ($DB in $ResDBs) {
 
-    $ResBKUPFile = "$DB $Date.bak"
-    $ResBKUPLocal = "$ResBKUPFolder\$ResBKUPFile"
+            $ResBKUPFile = "$DB $Date.bak"
+            $ResBKUPLocal = "$ResBKUPFolder\$ResBKUPFile"
 
-    if(Test-Path $ResBKUPLocal){
+            if (Test-Path $ResBKUPLocal) {
 
-    Write-Verbose "$ResBKUPFile already exists on $ResServer" -Verbose
+                Write-Verbose "$ResBKUPFile already exists on $ResServer" -Verbose
                            
-                switch -Wildcard ($DB){
-                            '*_Model*'{$ResDBHash.Add('Model',"$ResBKUPFile")}
-                               Default{$ResDBHash.Add('Data',"$ResBKUPFile")}     
-                                      }
+                switch -Wildcard ($DB) {
+                    '*_Model*' { $ResDBHash.Add('Model', "$ResBKUPFile") }
+                    Default { $ResDBHash.Add('Data', "$ResBKUPFile") }     
+                }
 
-                              }
-                              ELSE
-                              {
+            }
+            ELSE {
 
-                               switch -Wildcard ($DB){
-                            '*_Model*'{$ResDBHash.Add('Model',"$ResBKUPFile")}
-                               Default{$ResDBHash.Add('Data',"$ResBKUPFile")}     
-                                      }
+                switch -Wildcard ($DB) {
+                    '*_Model*' { $ResDBHash.Add('Model', "$ResBKUPFile") }
+                    Default { $ResDBHash.Add('Data', "$ResBKUPFile") }     
+                }
 
-                              Write-Verbose "Running Back up on $ResServer - $DB" -Verbose
+                Write-Verbose "Running Back up on $ResServer - $DB" -Verbose
 
-                              Backup-SqlDatabase -ServerInstance $ResServer -Database $DB -BackupFile $ResBKUPLocal -ConnectionTimeout 600 
+                Backup-SqlDatabase -ServerInstance $ResServer -Database $DB -BackupFile $ResBKUPLocal -ConnectionTimeout 600 
 
-                              }
+            }
                            
-                           }
+        }
 
 
-                           foreach($DB in $ResDBHash.Values){
+        foreach ($DB in $ResDBHash.Values) {
 
-                                                   if(!(Test-Path "$EnvDrive\$EnvfolderName\$DB")){
+            if (!(Test-Path "$EnvDrive\$EnvfolderName\$DB")) {
 
-                                                    write-verbose "Copying $DB to $Envserver" -verbose
+                write-verbose "Copying $DB to $Envserver" -verbose
                                                     
-                                                    Start-BitsTransfer -Source "$ResBKUPFolder\$db" -Destination "$EnvDrive\$EnvfolderName" -DisplayName $DB -Asynchronous 
+                Start-BitsTransfer -Source "$ResBKUPFolder\$db" -Destination "$EnvDrive\$EnvfolderName" -DisplayName $DB -Asynchronous 
                                                      
-                                                     }
-                                                     ELSE
-                                                     {
+            }
+            ELSE {
 
-                                                     $EnvFile = Get-ChildItem "$EnvDrive\$EnvfolderName\$DB"
-                                                     $ResFile = Get-ChildItem "$ResDrive\$ResfolderName\$DB"
+                $EnvFile = Get-ChildItem "$EnvDrive\$EnvfolderName\$DB"
+                $ResFile = Get-ChildItem "$ResDrive\$ResfolderName\$DB"
 
-                                                     if($EnvFile.LastWriteTime -eq $ResFile.LastWriteTime){
+                if ($EnvFile.LastWriteTime -eq $ResFile.LastWriteTime) {
                                                                               
-                                                                              Write-Verbose "$DB is already present on $EnvServer" -Verbose
+                    Write-Verbose "$DB is already present on $EnvServer" -Verbose
                                                                               
-                                                                              }
-                                                                              ELSE
-                                                                              {
+                }
+                ELSE {
 
-                                                                              Remove-item $EnvFile -for
+                    Remove-item $EnvFile -for
 
-                                                                              Write-Verbose "Transfering $DB" -Verbose
+                    Write-Verbose "Transfering $DB" -Verbose
 
-                                                                              Start-BitsTransfer -Source "$ResBKUPFolder\$db" -Destination "$EnvDrive\$EnvfolderName" -DisplayName $DB -Asynchronous
+                    Start-BitsTransfer -Source "$ResBKUPFolder\$db" -Destination "$EnvDrive\$EnvfolderName" -DisplayName $DB -Asynchronous
 
-                                                                              }
+                }
 
-                                                     }
-                                                     }
+            }
+        }
 
 
-  $Jobs = Get-BitsTransfer 
+        $Jobs = Get-BitsTransfer 
 
-while($Jobs.Count -ge '1'){
+        while ($Jobs.Count -ge '1') {
                            
-                          $Transfer = Get-BitsTransfer | Select-Object DisplayName, @{n='Completed';e={"$([math]::Round($_.BytesTransferred/$_.BytesTotal,2)*100)%"}}
+            $Transfer = Get-BitsTransfer | Select-Object DisplayName, @{n = 'Completed'; e = { "$([math]::Round($_.BytesTransferred/$_.BytesTotal,2)*100)%" } }
 
 
-                          $Transfer | Format-Table -AutoSize
+            $Transfer | Format-Table -AutoSize
 
-                          Start-Sleep 2
+            Start-Sleep 2
 
-                          Get-BitsTransfer | Where-Object {$_.JobState -eq "Transferred"} | Complete-BitsTransfer -ea SilentlyContinue
+            Get-BitsTransfer | Where-Object { $_.JobState -eq "Transferred" } | Complete-BitsTransfer -ea SilentlyContinue
 
-                          Clear-Host
+            Clear-Host
 
-                          if((Get-BitsTransfer).Count -eq '0'){
+            if ((Get-BitsTransfer).Count -eq '0') {
                                                               
-                                                              Break
+                Break
 
-                                                              }
+            }
 `
-                          }
+                          
+        }
 
                           
 
 
 
-$EnvAOS = "IDH-$Environment-AOS-01"
+        $EnvAOS = "IDH-$Environment-AOS-01"
 
-Write-Verbose "Stopping AX Service on $EnvAOS" -Verbose
+        Write-Verbose "Stopping AX Service on $EnvAOS" -Verbose
 
-Get-Service -ComputerName $EnvAOS -DisplayName "*AX Object Server*" | Stop-Service -Force
+        Get-Service -ComputerName $EnvAOS -DisplayName "*AX Object Server*" | Stop-Service -Force
 
-$EnvDB = "AX2012_$Environment"
-$EnvDBOrig = "AX2012_$Environment" + "_Orig"
+        $EnvDB = "AX2012_$Environment"
+        $EnvDBOrig = "AX2012_$Environment" + "_Orig"
 
-$OrigCheck = "
+        $OrigCheck = "
 IF (SELECT NAME FROM sys.databases WHERE name = '$envDBOrig`') IS NULL
 BEGIN 
 CREATE DATABASE $envDBOrig
@@ -281,9 +274,9 @@ END
              "
 
 
-Invoke-Sqlcmd -ServerInstance $EnvServer -Database Master -Query $OrigCheck
+        Invoke-Sqlcmd -ServerInstance $EnvServer -Database Master -Query $OrigCheck
 
-$SQL1 = "
+        $SQL1 = "
 print ' '
 print '------- PROCESS START  ------------'
 
@@ -502,11 +495,11 @@ GO
        
         "
 
-Write-Verbose "Creating Minimal Orig DB - $envDBOrig" -Verbose
+        Write-Verbose "Creating Minimal Orig DB - $envDBOrig" -Verbose
 
-Invoke-Sqlcmd -ServerInstance $EnvServer -Database $envDBOrig -Query $SQL1
+        Invoke-Sqlcmd -ServerInstance $EnvServer -Database $envDBOrig -Query $SQL1
 
-$SQL2 = "
+        $SQL2 = "
 DECLARE @SQL VARCHAR(MAX)
 SET @SQL = '
  
@@ -694,10 +687,10 @@ END
 
         "
 
-Write-Verbose "Creating SP_CopyTable - $envDBOrig" -Verbose
-Invoke-Sqlcmd -ServerInstance $EnvServer -Database $envDBOrig -Query $SQL2
+        Write-Verbose "Creating SP_CopyTable - $envDBOrig" -Verbose
+        Invoke-Sqlcmd -ServerInstance $EnvServer -Database $envDBOrig -Query $SQL2
 
-$SQL3 = "
+        $SQL3 = "
         
 DECLARE @SQL VARCHAR(MAX)
 SET @SQL = '
@@ -907,39 +900,39 @@ END
         
         "
 
-Write-Verbose "Creating SP_ReplaceConfigData - $envDBOrig" -Verbose
-Invoke-Sqlcmd -ServerInstance $EnvServer -Database $envDBOrig -Query $SQL3
+        Write-Verbose "Creating SP_ReplaceConfigData - $envDBOrig" -Verbose
+        Invoke-Sqlcmd -ServerInstance $EnvServer -Database $envDBOrig -Query $SQL3
 
-Set-Location c:\
+        Set-Location c:\
 
-$BKUPs = Get-ChildItem "$EnvDrive\$EnvfolderName" | Where-Object Name -like "*$RestoreFrom*" | Sort-Object -Descending
+        $BKUPs = Get-ChildItem "$EnvDrive\$EnvfolderName" | Where-Object Name -like "*$RestoreFrom*" | Sort-Object -Descending
 
-foreach($BK in $BKUPs){
+        foreach ($BK in $BKUPs) {
 
-                      $DB = switch -Wildcard ($BK.Name){
-                                         '*Model*'{"AX2012_$Environment" + "_Model"}
-                                           default{"AX2012_$Environment"}
-                                                 }
+            $DB = switch -Wildcard ($BK.Name) {
+                '*Model*' { "AX2012_$Environment" + "_Model" }
+                default { "AX2012_$Environment" }
+            }
 
-                      $EnvBKFile = "$DB $Date.bak"
-                      $EnvPath = "$EnvDrive\$EnvfolderName\$EnvBKFile"                  
+            $EnvBKFile = "$DB $Date.bak"
+            $EnvPath = "$EnvDrive\$EnvfolderName\$EnvBKFile"                  
 
-                      Write-Verbose "Backing up $DB" -Verbose
+            Write-Verbose "Backing up $DB" -Verbose
 
-                      Backup-SqlDatabase -ServerInstance $EnvServer -Database $DB -BackupFile $EnvPath
+            Backup-SqlDatabase -ServerInstance $EnvServer -Database $DB -BackupFile $EnvPath
 
-                      Get-Service -ComputerName $EnvServer -Name "MSSQLSERVER" | Restart-Service -Force
+            Get-Service -ComputerName $EnvServer -Name "MSSQLSERVER" | Restart-Service -Force
 
-                      Write-Verbose "Restoring up $DB" -Verbose
+            Write-Verbose "Restoring up $DB" -Verbose
 
-                      Restore-SqlDatabase -ServerInstance $EnvServer -Database $DB -BackupFile $BK.FullName -ReplaceDatabase 
+            Restore-SqlDatabase -ServerInstance $EnvServer -Database $DB -BackupFile $BK.FullName -ReplaceDatabase 
 
 
-                      }
+        }
 
-Start-Sleep -Seconds 30
+        Start-Sleep -Seconds 30
 
-$SQL4 = "
+        $SQL4 = "
         -- *******************************************************************************
 -- * Copy environment specific settings from [$EnvDBOrig]                     *
 -- * to [$EnvDB] database                                                      *
@@ -1448,10 +1441,10 @@ print ' '
         
         "
 
-Write-Verbose "Copying config from $envDBOrig to $EnvDB - $envDBOrig" -Verbose
-Invoke-Sqlcmd -ServerInstance $EnvServer -Database $envDBOrig -Query $SQL4
+        Write-Verbose "Copying config from $envDBOrig to $EnvDB - $envDBOrig" -Verbose
+        Invoke-Sqlcmd -ServerInstance $EnvServer -Database $envDBOrig -Query $SQL4
 
-$SQL5 = "      
+        $SQL5 = "      
 print '** BEGIN **'
 declare @tabid int, @nextval bigint, @lastUsed bigint, @sql NVARCHAR(4000),
 @msgName varchar(250), @tablename varchar(250)
@@ -1511,20 +1504,19 @@ print '** Finish **'
 
         "
 
-Write-Verbose "Correcting RecIDs in $EnvDB - $envDBOrig" -Verbose
-Invoke-Sqlcmd -ServerInstance $EnvServer -Database $envDB -Query $SQL5
+        Write-Verbose "Correcting RecIDs in $EnvDB - $envDBOrig" -Verbose
+        Invoke-Sqlcmd -ServerInstance $EnvServer -Database $envDB -Query $SQL5
 
-Write-Verbose "Starting AX service on $EnvAOS" -Verbose
-Get-Service -ComputerName $EnvAOS -DisplayName "*AX Object Server*" | Start-Service
+        Write-Verbose "Starting AX service on $EnvAOS" -Verbose
+        Get-Service -ComputerName $EnvAOS -DisplayName "*AX Object Server*" | Start-Service
 
     }
-    End
-    {
+    End {
 
-    $End = Get-Date -Format "HH:mm:ss"
+        $End = Get-Date -Format "HH:mm:ss"
 
-                          $Start
-                          $End 
+        $Start
+        $End 
 
     }
 }
