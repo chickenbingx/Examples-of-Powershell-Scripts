@@ -1,6 +1,5 @@
-# Examples-of-PowerShell-Scripts-MF
- **This Git Repo Is for examples for Muscle Food only**
-
+# Examples-of-PowerShell-Scripts
+These examples are for interview purpose only
 
 ## Exchange Migration Scripts
 
